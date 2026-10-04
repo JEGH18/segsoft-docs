@@ -108,6 +108,10 @@ npm run dev
 | `ALLOWED_GIT_DOMAINS`      | Dominios Git permitidos (separados por coma) |
 | `RULE_TIMEOUT_MS`          | Timeout por regla de análisis en milisegundos (default: 30000) |
 | `TRACEABILITY_RETENTION_DAYS` | Días de retención de registros de trazabilidad (default: 365) |
+| `MAX_EXPORT_SIZE_MB`       | Tamaño máximo de un PDF/SARIF exportado en MB (default: 50); si se supera, HTTP 422 |
+| `EXPORT_CACHE_DIR`         | Directorio de la caché de exportaciones (default: `${java.io.tmpdir}/pdgseg-export-cache`) |
+| `EXPORT_CACHE_TTL`         | Vigencia de una exportación cacheada, ISO-8601 (default: `PT1H`; `PT0S` la desactiva) |
+| `EXPORT_CACHE_CLEANUP_INTERVAL` | Frecuencia de limpieza de exportaciones expiradas (default: `PT15M`) |
 | `VITE_API_BASE_URL`        | URL base de la API para el frontend |
 
 ---
