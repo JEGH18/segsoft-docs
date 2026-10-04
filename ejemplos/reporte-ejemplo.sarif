@@ -1,0 +1,316 @@
+{
+  "$schema" : "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "version" : "2.1.0",
+  "runs" : [ {
+    "tool" : {
+      "driver" : {
+        "name" : "PDG-SegSoft",
+        "version" : "0.1.0",
+        "semanticVersion" : "0.1.0",
+        "informationUri" : "https://github.com/JEGH18/segsoft-backend",
+        "organization" : "Universidad Icesi",
+        "rules" : [ {
+          "id" : "11111111-0000-0000-0000-000000000001",
+          "name" : "ConcatenacionDirectaDeCadenasEnQuerySql",
+          "shortDescription" : {
+            "text" : "Concatenación directa de cadenas en query SQL"
+          },
+          "fullDescription" : {
+            "text" : "Concatenación directa de cadenas en query SQL. Política: «Consultas parametrizadas obligatorias». Categoría: SQL_INJECTION. CWE-89."
+          },
+          "helpUri" : "https://cwe.mitre.org/data/definitions/89.html",
+          "defaultConfiguration" : {
+            "level" : "error"
+          },
+          "properties" : {
+            "tags" : [ "security", "sql-injection", "external/cwe/cwe-89" ],
+            "security-severity" : "9.5",
+            "severity" : "CRITICAL",
+            "category" : "SQL_INJECTION",
+            "ruleType" : "PATTERN_REGEX",
+            "policyId" : "22222222-0000-0000-0000-000000000001",
+            "policyName" : "Consultas parametrizadas obligatorias"
+          }
+        }, {
+          "id" : "11111111-0000-0000-0000-000000000006",
+          "name" : "ConsultaSelectSinFiltroDeColumnasSensibles",
+          "shortDescription" : {
+            "text" : "Consulta SELECT * sin filtro de columnas sensibles"
+          },
+          "fullDescription" : {
+            "text" : "Consulta SELECT * sin filtro de columnas sensibles. Política: «Consultas parametrizadas obligatorias». Categoría: SQL_INJECTION. CWE-89."
+          },
+          "helpUri" : "https://cwe.mitre.org/data/definitions/89.html",
+          "defaultConfiguration" : {
+            "level" : "warning"
+          },
+          "properties" : {
+            "tags" : [ "security", "sql-injection", "external/cwe/cwe-89" ],
+            "security-severity" : "5.5",
+            "severity" : "MEDIUM",
+            "category" : "SQL_INJECTION",
+            "ruleType" : "PATTERN_REGEX",
+            "policyId" : "22222222-0000-0000-0000-000000000001",
+            "policyName" : "Consultas parametrizadas obligatorias"
+          }
+        }, {
+          "id" : "11111111-0000-0000-0000-000000000002",
+          "name" : "AsignacionDirectaAInnerhtmlSinEscape",
+          "shortDescription" : {
+            "text" : "Asignación directa a innerHTML sin escape"
+          },
+          "fullDescription" : {
+            "text" : "Asignación directa a innerHTML sin escape. Política: «Codificación de salida HTML». Categoría: XSS. CWE-79."
+          },
+          "helpUri" : "https://cwe.mitre.org/data/definitions/79.html",
+          "defaultConfiguration" : {
+            "level" : "error"
+          },
+          "properties" : {
+            "tags" : [ "security", "xss", "external/cwe/cwe-79" ],
+            "security-severity" : "8.0",
+            "severity" : "HIGH",
+            "category" : "XSS",
+            "ruleType" : "PATTERN_REGEX",
+            "policyId" : "22222222-0000-0000-0000-000000000002",
+            "policyName" : "Codificación de salida HTML"
+          }
+        }, {
+          "id" : "11111111-0000-0000-0000-000000000003",
+          "name" : "CredencialesEmbebidasEnElCodigo",
+          "shortDescription" : {
+            "text" : "Credenciales embebidas en el código"
+          },
+          "fullDescription" : {
+            "text" : "Credenciales embebidas en el código. Política: «No almacenar secretos en código fuente». Categoría: AUTHENTICATION_FAILURE. CWE-798."
+          },
+          "helpUri" : "https://cwe.mitre.org/data/definitions/798.html",
+          "defaultConfiguration" : {
+            "level" : "error"
+          },
+          "properties" : {
+            "tags" : [ "security", "authentication-failure", "external/cwe/cwe-798" ],
+            "security-severity" : "8.0",
+            "severity" : "HIGH",
+            "category" : "AUTHENTICATION_FAILURE",
+            "ruleType" : "PATTERN_REGEX",
+            "policyId" : "22222222-0000-0000-0000-000000000003",
+            "policyName" : "No almacenar secretos en código fuente"
+          }
+        }, {
+          "id" : "11111111-0000-0000-0000-000000000004",
+          "name" : "DatosSensiblesAlmacenadosSinCifrado",
+          "shortDescription" : {
+            "text" : "Datos sensibles almacenados sin cifrado"
+          },
+          "fullDescription" : {
+            "text" : "Datos sensibles almacenados sin cifrado. Política: «Cifrado de datos sensibles en reposo». Categoría: INSECURE_DATA_HANDLING."
+          },
+          "helpUri" : "https://owasp.org/Top10/A02_2021-Cryptographic_Failures/",
+          "defaultConfiguration" : {
+            "level" : "warning"
+          },
+          "properties" : {
+            "tags" : [ "security", "insecure-data-handling" ],
+            "security-severity" : "5.5",
+            "severity" : "MEDIUM",
+            "category" : "INSECURE_DATA_HANDLING",
+            "ruleType" : "CONFIG_CHECK",
+            "policyId" : "22222222-0000-0000-0000-000000000004",
+            "policyName" : "Cifrado de datos sensibles en reposo"
+          }
+        }, {
+          "id" : "11111111-0000-0000-0000-000000000005",
+          "name" : "DependenciaConVulnerabilidadConocida",
+          "shortDescription" : {
+            "text" : "Dependencia con vulnerabilidad conocida"
+          },
+          "fullDescription" : {
+            "text" : "Dependencia con vulnerabilidad conocida. Política: «Remediación oportuna de vulnerabilidades en componentes». Categoría: DEPENDENCY_VULNERABILITY. CWE-1104."
+          },
+          "helpUri" : "https://cwe.mitre.org/data/definitions/1104.html",
+          "defaultConfiguration" : {
+            "level" : "note"
+          },
+          "properties" : {
+            "tags" : [ "security", "dependency-vulnerability", "external/cwe/cwe-1104" ],
+            "security-severity" : "2.0",
+            "severity" : "LOW",
+            "category" : "DEPENDENCY_VULNERABILITY",
+            "ruleType" : "DEPENDENCY_CHECK",
+            "policyId" : "22222222-0000-0000-0000-000000000005",
+            "policyName" : "Remediación oportuna de vulnerabilidades en componentes"
+          }
+        } ]
+      }
+    },
+    "automationDetails" : {
+      "id" : "pdg-segsoft/0f8f7c1e-4c1a-4f3e-9d7a-2b6c1d0e9a11"
+    },
+    "versionControlProvenance" : [ {
+      "repositoryUri" : "https://github.com/acme/payments.git",
+      "branch" : "main"
+    } ],
+    "invocations" : [ {
+      "executionSuccessful" : true,
+      "startTimeUtc" : "2026-09-28T06:16:35Z",
+      "endTimeUtc" : "2026-09-28T06:17:17Z",
+      "properties" : {
+        "rulesExecuted" : 24,
+        "rulesTotal" : 24,
+        "ruleExecutionErrors" : 0
+      }
+    } ],
+    "results" : [ {
+      "ruleId" : "11111111-0000-0000-0000-000000000001",
+      "ruleIndex" : 0,
+      "level" : "error",
+      "message" : {
+        "text" : "Concatenación directa de cadenas en query SQL. Política incumplida: «Consultas parametrizadas obligatorias». Acción sugerida: Usar PreparedStatement con parámetros."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "src/main/java/com/acme/UserDao.java",
+            "uriBaseId" : "%SRCROOT%"
+          },
+          "region" : {
+            "startLine" : 42,
+            "snippet" : {
+              "text" : "stmt.executeQuery(\"SELECT * FROM users WHERE id=\" + id);"
+            }
+          }
+        }
+      } ],
+      "properties" : {
+        "findingId" : "fad9c20a-7059-3745-a5be-b19dffb72940",
+        "severity" : "CRITICAL",
+        "category" : "SQL_INJECTION",
+        "policyId" : "22222222-0000-0000-0000-000000000001",
+        "policyName" : "Consultas parametrizadas obligatorias",
+        "cweId" : "CWE-89"
+      }
+    }, {
+      "ruleId" : "11111111-0000-0000-0000-000000000002",
+      "ruleIndex" : 2,
+      "level" : "error",
+      "message" : {
+        "text" : "Asignación directa a innerHTML sin escape. Política incumplida: «Codificación de salida HTML». Acción sugerida: Usar textContent o sanitizar con DOMPurify."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "src/web/mi%20archivo.js",
+            "uriBaseId" : "%SRCROOT%"
+          },
+          "region" : {
+            "startLine" : 18,
+            "snippet" : {
+              "text" : "panel.innerHTML = userInput;"
+            }
+          }
+        }
+      } ],
+      "properties" : {
+        "findingId" : "7764456e-69e4-3455-94e7-f3887f7b8abf",
+        "severity" : "HIGH",
+        "category" : "XSS",
+        "policyId" : "22222222-0000-0000-0000-000000000002",
+        "policyName" : "Codificación de salida HTML",
+        "cweId" : "CWE-79"
+      }
+    }, {
+      "ruleId" : "11111111-0000-0000-0000-000000000003",
+      "ruleIndex" : 3,
+      "level" : "error",
+      "message" : {
+        "text" : "Credenciales embebidas en el código. Política incumplida: «No almacenar secretos en código fuente». Acción sugerida: Mover la clave a un gestor de secretos."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "config/settings.py",
+            "uriBaseId" : "%SRCROOT%"
+          },
+          "region" : {
+            "startLine" : 7,
+            "snippet" : {
+              "text" : "API_KEY = \"*****\""
+            }
+          }
+        }
+      } ],
+      "properties" : {
+        "findingId" : "9b67fdec-6d6e-395a-992a-81d05a77a7dc",
+        "severity" : "HIGH",
+        "category" : "AUTHENTICATION_FAILURE",
+        "policyId" : "22222222-0000-0000-0000-000000000003",
+        "policyName" : "No almacenar secretos en código fuente",
+        "cweId" : "CWE-798"
+      }
+    }, {
+      "ruleId" : "11111111-0000-0000-0000-000000000004",
+      "ruleIndex" : 4,
+      "level" : "warning",
+      "message" : {
+        "text" : "Datos sensibles almacenados sin cifrado. Política incumplida: «Cifrado de datos sensibles en reposo». Acción sugerida: Habilitar cifrado en reposo."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "deploy/app.yml",
+            "uriBaseId" : "%SRCROOT%"
+          }
+        }
+      } ],
+      "properties" : {
+        "findingId" : "d432e016-2efe-3f35-abf8-48912a9eee17",
+        "severity" : "MEDIUM",
+        "category" : "INSECURE_DATA_HANDLING",
+        "policyId" : "22222222-0000-0000-0000-000000000004",
+        "policyName" : "Cifrado de datos sensibles en reposo"
+      }
+    }, {
+      "ruleId" : "11111111-0000-0000-0000-000000000005",
+      "ruleIndex" : 5,
+      "level" : "note",
+      "message" : {
+        "text" : "Dependencia con vulnerabilidad conocida. Política incumplida: «Remediación oportuna de vulnerabilidades en componentes». Acción sugerida: Actualizar requests a 2.32.0 o superior."
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "requirements.txt",
+            "uriBaseId" : "%SRCROOT%"
+          },
+          "region" : {
+            "startLine" : 3,
+            "snippet" : {
+              "text" : "requests==2.19.0"
+            }
+          }
+        }
+      } ],
+      "properties" : {
+        "findingId" : "0f8a8c27-6b24-395e-94eb-fcfebc9932e0",
+        "severity" : "LOW",
+        "category" : "DEPENDENCY_VULNERABILITY",
+        "policyId" : "22222222-0000-0000-0000-000000000005",
+        "policyName" : "Remediación oportuna de vulnerabilidades en componentes",
+        "cweId" : "CWE-1104"
+      }
+    } ],
+    "properties" : {
+      "reportId" : "0f8f7c1e-4c1a-4f3e-9d7a-2b6c1d0e9a11",
+      "reportStatus" : "GENERATED",
+      "reportChecksum" : "9f2c4e1b7a3d5f60c8e9b1a2d3c4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f6",
+      "reportGeneratedAt" : "2026-09-28T06:21:35Z",
+      "analysisId" : "85db2d64-9c6f-4dd2-8eb0-254ab3496a8d",
+      "repositoryName" : "acme-payments",
+      "compliancePercentage" : 16.67,
+      "weightedCompliancePercentage" : 12.50,
+      "policiesEvaluated" : 6,
+      "totalFindings" : 5
+    }
+  } ]
+}
