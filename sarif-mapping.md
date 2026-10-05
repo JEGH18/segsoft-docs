@@ -11,6 +11,7 @@ Authorization: Bearer <JWT de un usuario AUDITOR o SECURITY_ADMIN>
 
 200  Content-Type: application/sarif+json
      Content-Disposition: attachment; filename="segsoft-report-{id}.sarif"
+     X-Cache: HIT | MISS
 ```
 
 | Respuesta | Cuándo |
@@ -20,6 +21,7 @@ Authorization: Bearer <JWT de un usuario AUDITOR o SECURITY_ADMIN>
 | `403` | El usuario no es AUDITOR ni SECURITY_ADMIN |
 | `404` | El reporte no existe |
 | `409` `REPORT_INTEGRITY_ERROR` | El checksum del reporte no coincide con su contenido |
+| `422` `EXPORT_TOO_LARGE` | El archivo supera `MAX_EXPORT_SIZE_MB` (ver [exportaciones-cache-rendimiento.md](exportaciones-cache-rendimiento.md)) |
 | `500` `SARIF_VALIDATION_ERROR` | El SARIF generado no cumple el schema; **no se envía**, la respuesta trae `traceId` y las violaciones quedan en el log |
 
 Implementación (`segsoft-backend`):
