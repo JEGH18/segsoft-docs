@@ -575,7 +575,7 @@ jobs:
           done
 
           # 4. Congelar el reporte y exportarlo en SARIF
-          REPORT=$(api -X POST "$SEGSOFT_URL/api/v1/reports" -d "{\"analysisId\":\"$ANALYSIS\"}" | jq -r .id)
+          REPORT=$(api -X POST "$SEGSOFT_URL/api/v1/analyses/$ANALYSIS/reports" | jq -r .id)
           api -o segsoft.sarif "$SEGSOFT_URL/api/v1/reports/$REPORT/export?format=sarif"
 
       - name: Subir a GitHub Code Scanning
