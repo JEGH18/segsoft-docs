@@ -39,7 +39,7 @@ Además: `id`, `status` (`GENERATED`), `view`, `schemaVersion`, `checksum`,
 `integrityVerified` y `exportFormats`.
 
 **Contrato:** el documento valida contra
-[`structured-report.schema.json`](https://github.com/JEGH18/segsoft-backend/blob/main/src/main/resources/report/structured-report.schema.json)
+[`structured-report.schema.json`](https://pi2tools.icesi.edu.co/bitbucket/projects/SEGSOFT/repos/segsoft-backend/browse/src/main/resources/report/structured-report.schema.json)
 (JSON Schema draft-07). El schema también garantiza que la vista ejecutiva **no**
 incluye `policyResults`, hallazgos individuales ni controles.
 
@@ -145,8 +145,14 @@ mismas funciones y a partir de sus propios datos congelados.
 | `ReportServiceTest`, `ReportControllerTest`, `AnalysisReportControllerTest` | 201 + `Location`, 404, 422 con el estado, 409, 405, vistas, histórico y roles |
 | `StructuredReportIntegrationTest` (PostgreSQL) | Generación persistida como JSONB y `GENERATED`; JSON Schema sobre respuestas reales; 422 para `CANCELLED`, `FAILED`, `RUNNING` y `QUEUED`; **inmutabilidad** (editar hallazgos, resultados, políticas y repositorio no altera el reporte); **append-only** (UPDATE y DELETE rechazados); borrar el repositorio conserva el reporte; **manipulación** del JSONB detectada por el checksum (409 + auditoría); histórico por repositorio |
 
-El workflow **CI Backend - Reportes** (`segsoft-backend/.github/workflows/ci-backend.yml`)
-corre estas suites, incluida la validación del JSON Schema, y las de
-integración contra un PostgreSQL 15 de servicio en cada push a `main` y en cada
-pull request. Por ahora no corre todo `mvn test`: el resto del proyecto arrastra
-25 fallos previos y ajenos a los reportes (están listados en el workflow).
+El pipeline de Jenkins de p2tools (`segsoft-backend/Jenkinsfile`, ver
+[ci-jenkins-p2tools.md](ci-jenkins-p2tools.md)) corre estas suites, incluida la
+validación del JSON Schema, y las de integración contra un PostgreSQL 15 propio
+del build. El espejo en GitHub hace lo mismo con el workflow **CI Backend -
+Reportes** (`.github/workflows/ci-backend.yml`). Por ahora ninguno corre todo
+`mvn test`: el resto del proyecto arrastra 25 fallos previos y ajenos a los
+reportes (están listados en el `Jenkinsfile` y en el workflow).
+
+Con `CI=true` (los dos pipelines lo fijan), los tests de integración **fallan**
+si no hay base de datos, en vez de omitirse: un build nunca queda en verde sin
+haberlos ejecutado.
