@@ -23,6 +23,9 @@ Por SSH (solo desde la red de la Icesi o con VPN):
 El CI corre en el Jenkins de p2tools con el `Jenkinsfile` de cada repositorio de código:
 ver [ci-jenkins-p2tools.md](ci-jenkins-p2tools.md).
 
+El material para las pruebas con usuarios (contexto para el guion y la encuesta, proyectos
+ZIP de prueba y capturas de la interfaz) está en [pruebas-usuarios/](pruebas-usuarios/).
+
 ---
 
 ## Requisitos
