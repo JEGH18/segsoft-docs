@@ -5,19 +5,23 @@ Detecta vulnerabilidades en repositorios de código fuente en 5 categorías: SQL
 
 ---
 
-## Estructura del monorepo
+## Repositorios
 
-```
-segsoft/
-├── backend/
-│   ├── backend-spring/   # API REST principal (Spring Boot 3 / Java 17)
-│   └── engine-python/    # Motor de análisis de reglas (FastAPI / Python 3.11)
-├── frontend/
-│   └── pdgseg-frontend/  # SPA (React 18 + Vite 5 + TypeScript)
-├── docs/                 # Documentación técnica (mapeo SARIF, ADRs)
-├── docker-compose.yml
-└── bitbucket-pipelines.yml
-```
+El proyecto se divide en cuatro repositorios. Los oficiales están en **p2tools**
+(Bitbucket Server de la Icesi); GitHub (`JEGH18/…`) es un espejo.
+
+| Repositorio | Contenido | p2tools |
+|---|---|---|
+| `segsoft-backend` | API REST principal (Spring Boot 3 / Java 17) | `https://pi2tools.icesi.edu.co/bitbucket/scm/segsoft/segsoft-backend.git` |
+| `segsoft-motorpython` | Motor de análisis de reglas (FastAPI / Python 3.11) | `https://pi2tools.icesi.edu.co/bitbucket/scm/segsoft/segsoft-motorpython.git` |
+| `segsoft-frontend` | SPA (React 18 + Vite 5 + TypeScript) | `https://pi2tools.icesi.edu.co/bitbucket/scm/segsoft/segsoft-frontend.git` |
+| `segsoft-docs` | Documentación técnica (este repositorio) | `https://pi2tools.icesi.edu.co/bitbucket/scm/segsoft/segsoft-docs.git` |
+
+Por SSH (solo desde la red de la Icesi o con VPN):
+`ssh://git@pi2tools.icesi.edu.co:7999/segsoft/<repositorio>.git`.
+
+El CI corre en el Jenkins de p2tools con el `Jenkinsfile` de cada repositorio de código:
+ver [ci-jenkins-p2tools.md](ci-jenkins-p2tools.md).
 
 ---
 
@@ -60,7 +64,7 @@ Servicios disponibles:
 ### Backend Spring Boot
 
 ```bash
-cd backend/backend-spring
+cd segsoft-backend
 # Requiere PostgreSQL corriendo en localhost:5432
 # Usar el perfil dev:
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
@@ -69,7 +73,7 @@ cd backend/backend-spring
 ### Motor Python
 
 ```bash
-cd backend/engine-python
+cd segsoft-motorpython
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .[dev]
@@ -79,7 +83,7 @@ uvicorn app.main:app --reload --port 8001
 ### Frontend
 
 ```bash
-cd frontend/pdgseg-frontend
+cd segsoft-frontend
 cp .env.example .env
 npm install
 npm run dev
@@ -121,14 +125,17 @@ npm run dev
 ### Spring Boot
 
 ```bash
-cd backend/backend-spring
+cd segsoft-backend
 mvn test
+# Tests de integración: requieren PostgreSQL en localhost:5432/pdgseg_test
+# (o SPRING_DATASOURCE_URL apuntando a otra base)
+mvn test -Pintegration-tests
 ```
 
 ### Motor Python
 
 ```bash
-cd backend/engine-python
+cd segsoft-motorpython
 pytest tests/ -v
 bandit -c bandit.yml -r app/
 ```
@@ -136,7 +143,7 @@ bandit -c bandit.yml -r app/
 ### Frontend
 
 ```bash
-cd frontend/pdgseg-frontend
+cd segsoft-frontend
 npm test
 npm run test:e2e
 ```

@@ -3,6 +3,10 @@
 HU **Exportar reporte de cumplimiento en formato SARIF 2.1.0**, subtarea *Test
 de upload a GitHub Code Scanning*.
 
+> El repositorio de prueba está en GitHub a propósito: Code Scanning es una función
+> de GitHub, y Bitbucket Server (p2tools) no tiene un equivalente. Los enlaces de
+> esta evidencia apuntan por eso a GitHub, no a p2tools.
+
 - **Fecha:** 2026-10-04
 - **Repositorio de prueba:** [JEGH18/SegSoft-Pruebas](https://github.com/JEGH18/SegSoft-Pruebas) (público)
 - **Workflow:** [`.github/workflows/segsoft-code-scanning.yml`](https://github.com/JEGH18/SegSoft-Pruebas/blob/main/.github/workflows/segsoft-code-scanning.yml), con `github/codeql-action/upload-sarif@v4`

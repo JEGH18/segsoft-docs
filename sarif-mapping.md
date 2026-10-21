@@ -180,7 +180,7 @@ El archivo completo está en [ejemplos/reporte-ejemplo.sarif](ejemplos/reporte-e
         "name" : "PDG-SegSoft",
         "version" : "0.1.0",
         "semanticVersion" : "0.1.0",
-        "informationUri" : "https://github.com/JEGH18/segsoft-backend",
+        "informationUri" : "https://pi2tools.icesi.edu.co/bitbucket/projects/SEGSOFT/repos/segsoft-backend",
         "organization" : "Universidad Icesi",
         "rules" : [ {
           "id" : "11111111-0000-0000-0000-000000000001",
@@ -504,6 +504,11 @@ Fíjate en el ejemplo:
 ---
 
 ## 3. Integración con GitHub Actions (Code Scanning)
+
+> Bitbucket Server 7.21 (p2tools) no tiene un visor de SARIF equivalente a Code
+> Scanning. Esta sección aplica a quien quiera consumir el SARIF de SegSoft desde
+> un repositorio en GitHub; la prueba real está en
+> [evidencias/sarif-github-code-scanning.md](evidencias/sarif-github-code-scanning.md).
 
 ### Requisitos
 
