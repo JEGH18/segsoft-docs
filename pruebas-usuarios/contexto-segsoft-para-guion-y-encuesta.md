@@ -75,7 +75,13 @@ Las crea automáticamente el sistema en entornos que no son de producción.
 > con cuidado o al final de la sesión. Lo recomendable es no incluirlo en un
 > guion que usen varias personas a la vez.
 
-No hay pantalla de registro ni de gestión de usuarios: las cuentas son fijas.
+**Crear cuenta (registro):** desde el login, el enlace **"Crear cuenta"** abre `/register`.
+Cualquiera puede crear una cuenta con rol **DEVELOPER** (usuario de 3 a 50 caracteres que
+empieza por letra, guardado en minúsculas; contraseña de 12 o más caracteres con mayúscula,
+minúscula, número y carácter especial). Al crearla entra directo al Dashboard. Las cuentas
+AUDITOR y SECURITY_ADMIN no se pueden crear desde la aplicación: son las del despliegue. No
+hay pantalla de gestión de usuarios (cambiar roles, deshabilitar cuentas). Detalle en
+[registro-usuarios.md](../registro-usuarios.md).
 
 ### Datos de prueba: tres proyectos ZIP
 
@@ -541,8 +547,8 @@ sugeridos; la IA debe adaptarlos al formato de la universidad.
   navegador, muestra "Aún no has ejecutado ningún análisis".
 - **Inventario de archivos:** existe (`/repositories/{id}/files`, con filtros
   por lenguaje y tipo de artefacto), pero **no tiene enlace** en la interfaz.
-- **Usuarios:** no hay registro ni gestión de usuarios; las cuatro cuentas son
-  fijas.
+- **Usuarios:** el registro solo crea cuentas DEVELOPER, y no hay gestión de usuarios: para
+  tener un AUDITOR o un SECURITY_ADMIN hay que usar las cuentas del despliegue.
 - **Idioma mixto:**
   - El menú dice "Policies" y "Policy Sets".
   - En Resultados se usa "Findings" y las severidades salen en inglés

@@ -26,6 +26,9 @@ ver [ci-jenkins-p2tools.md](ci-jenkins-p2tools.md).
 El despliegue (frontend en Vercel; backend, motor y PostgreSQL con Docker en un servidor)
 está documentado en `segsoft-backend/deploy/README.md`.
 
+Cualquier persona puede crear una cuenta DEVELOPER desde la aplicación: ver
+[registro-usuarios.md](registro-usuarios.md).
+
 El material para las pruebas con usuarios (contexto para el guion y la encuesta, proyectos
 ZIP de prueba y capturas de la interfaz) está en [pruebas-usuarios/](pruebas-usuarios/).
 
