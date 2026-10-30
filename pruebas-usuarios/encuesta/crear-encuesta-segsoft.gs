@@ -27,6 +27,7 @@ function crearEncuestaSegSoft() {
     .setProgressBar(true)
     .setCollectEmail(false)
     .setAllowResponseEdits(false)
+    .setShowLinkToRespondAgain(false)
     .setConfirmationMessage('Gracias por su participación. Sus respuestas contribuyen a mejorar SegSoft.');
 
   // ── 1. Perfil del participante ───────────────────────────────────────────────
