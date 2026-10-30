@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>SegSoft · Guion de pruebas con usuarios</title>
+<!--
+  Fuente del guion de pruebas. Para generar el PDF: abrir este archivo en Chrome o Edge,
+  Imprimir → Guardar como PDF, tamaño A4, márgenes predeterminados, con "Gráficos de fondo".
+-->
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm; }
+  :root { --ink: #1c2433; --muted: #5b6575; --line: #c9d0da; --soft: #f2f4f7; --accent: #1f3a6b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; font-size: 10pt; line-height: 1.45; color: var(--ink); background: #fff; }
+  .page { break-after: page; }
+  .page:last-child { break-after: auto; }
+  header.doc { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--accent); padding-bottom: 6px; margin-bottom: 14px; }
+  header.doc .brand { font-size: 9pt; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  header.doc .meta { font-size: 8.5pt; color: var(--muted); text-align: right; }
+  h1 { font-size: 18pt; margin: 0 0 4px; }
+  h2 { font-size: 12.5pt; margin: 18px 0 6px; color: var(--accent); }
+  h2:first-child { margin-top: 0; }
+  p { margin: 0 0 8px; }
+  .lead { color: var(--muted); margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; }
+  .fields td { border: 1px solid var(--line); padding: 7px 8px; height: 28px; }
+  .fields td.k { width: 26%; background: var(--soft); font-weight: 600; }
+  .info td { border-bottom: 1px solid var(--line); padding: 5px 6px; vertical-align: top; }
+  .info td.k { width: 26%; font-weight: 600; }
+  code, .mono { font-family: "Consolas", "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace; font-size: 8.8pt; white-space: nowrap; }
+  .ui { font-weight: 600; }
+  ul { margin: 0 0 8px; padding-left: 18px; }
+  li { margin-bottom: 3px; }
+  .box { border: 1px solid var(--line); background: var(--soft); border-radius: 6px; padding: 9px 12px; margin: 10px 0; }
+  .tasks { margin-top: 6px; }
+  .tasks th { background: var(--accent); color: #fff; font-size: 8.5pt; text-align: left; padding: 6px 7px; font-weight: 600; }
+  .tasks td { border: 1px solid var(--line); padding: 6px 7px; vertical-align: top; font-size: 9.5pt; }
+  .tasks tr { break-inside: avoid; }
+  .tasks td.n { width: 7%; font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .tasks td.t { width: 43%; }
+  .tasks td.e { width: 32%; color: #2f3a4b; }
+  .tasks td.r { width: 18%; font-size: 9pt; white-space: nowrap; }
+  .tasks td.obs { height: 34px; font-size: 8.5pt; color: var(--muted); background: #fbfcfd; }
+  .tasks tbody.task { break-inside: avoid; }
+  .check::before { content: ""; display: inline-block; width: 9px; height: 9px; border: 1px solid var(--ink); margin-right: 5px; vertical-align: -1px; }
+  .role-intro { color: var(--muted); margin-bottom: 8px; }
+  .small { font-size: 8.5pt; color: var(--muted); }
+  .mono.cmd { white-space: normal; word-break: break-all; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+</style>
+</head>
+<body>
+
+<!-- ───────────────────────── Página 1: instrucciones generales ───────────────────────── -->
+<section class="page">
+  <header class="doc">
+    <div class="brand">SegSoft · Universidad Icesi</div>
+    <div class="meta">Versión 2.0 · octubre de 2026</div>
+  </header>
+
+  <h1>Guion de pruebas con usuarios</h1>
+  <p class="lead">Este guion orienta la sesión de prueba de SegSoft, una plataforma de análisis estático de
+    seguridad y cumplimiento normativo de código fuente. Usted realizará un conjunto breve de tareas
+    según el rol asignado y marcará cómo le fue en cada una. <strong>Se evalúa la aplicación, no a la
+    persona</strong>: cualquier dificultad es información valiosa. Duración estimada: 30 minutos.</p>
+
+  <h2>Datos de la sesión</h2>
+  <table class="fields">
+    <tr><td class="k">Nombre o alias</td><td></td><td class="k">Fecha</td><td></td></tr>
+    <tr><td class="k">Rol asignado</td><td colspan="3">
+      <span class="check">Developer</span>&nbsp;&nbsp;&nbsp;
+      <span class="check">Auditor</span>&nbsp;&nbsp;&nbsp;
+      <span class="check">Security Admin</span></td></tr>
+    <tr><td class="k">Navegador</td><td></td><td class="k">Facilitador</td><td></td></tr>
+  </table>
+
+  <h2>Antes de empezar</h2>
+  <table class="info">
+    <tr><td class="k">Dirección de la aplicación</td>
+        <td><span class="mono">https://segsoft-frontend.vercel.app</span>. Use Google Chrome o Microsoft Edge.</td></tr>
+    <tr><td class="k">Cuenta de acceso</td>
+        <td><strong>Developer:</strong> usted creará su propia cuenta en la tarea D-1.<br>
+            <strong>Auditor y Security Admin:</strong> el facilitador le entregará el usuario y la contraseña.
+            Por seguridad, las contraseñas no se incluyen en este documento.</td></tr>
+    <tr><td class="k">Proyectos de prueba</td>
+        <td>Tres versiones de una misma tienda en línea, en formato ZIP:
+            <span class="mono">proyecto-vulnerable.zip</span>, <span class="mono">proyecto-intermedio.zip</span> y
+            <span class="mono">proyecto-limpio.zip</span>. El facilitador se los entregará; también están en la carpeta
+            <span class="mono">pruebas-usuarios</span> del repositorio
+            <span class="mono">github.com/JEGH18/segsoft-docs</span>.</td></tr>
+  </table>
+
+  <h2>Cómo registrar cada tarea</h2>
+  <ul>
+    <li>Lea la tarea completa antes de realizarla.</li>
+    <li>Compare lo que observa en pantalla con la columna <strong>Resultado esperado</strong>.</li>
+    <li>Marque <span class="ui">Sí</span> si la completó sin ayuda, <span class="ui">Con dificultad</span>
+      si lo logró con dudas o con ayuda, y <span class="ui">No</span> si no pudo completarla.</li>
+    <li>Si una tarea le toma más de tres minutos, márquela como <span class="ui">No</span> y continúe con la siguiente.</li>
+    <li>Use el espacio de <strong>Observaciones</strong> para anotar lo que le resultó confuso o lo que esperaba
+      que ocurriera.</li>
+  </ul>
+  <p>En las páginas siguientes encontrará las tareas de cada rol. <strong>Realice únicamente las de su rol.</strong>
+    Los textos entre comillas («») corresponden a botones, menús o mensajes tal como aparecen en la aplicación.</p>
+
+  <h2>Al terminar</h2>
+  <p>Cierre la sesión con el ícono ubicado arriba a la derecha y responda la <strong>encuesta de
+    satisfacción</strong> cuyo enlace le compartirá el facilitador. Toma alrededor de 10 minutos.</p>
+</section>
+
+<!-- ───────────────────────── Página 2: Developer ───────────────────────── -->
+<section class="page">
+  <header class="doc">
+    <div class="brand">SegSoft · Guion de pruebas</div>
+    <div class="meta">Tareas del rol Developer</div>
+  </header>
+  <h1>Rol Developer</h1>
+  <p class="role-intro">El Developer sube su proyecto, lo analiza con las políticas de seguridad y revisa los
+    hallazgos para corregirlos. Usará el archivo <span class="mono">proyecto-vulnerable.zip</span>.</p>
+
+  <table class="tasks">
+    <thead><tr><th>N.º</th><th>Tarea</th><th>Resultado esperado</th><th>Resultado</th></tr></thead>
+    <tbody class="task">
+      <tr><td class="n">D-1</td>
+        <td class="t">En la pantalla de inicio pulse «Crear cuenta». Elija un usuario (por ejemplo, sus iniciales
+          seguidas de un número) y una contraseña que cumpla los requisitos indicados en el formulario. Pulse
+          «Crear cuenta».</td>
+        <td class="e">La aplicación lo lleva al Dashboard («Analiza tu proyecto») con la sesión iniciada.</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">D-2</td>
+        <td class="t">En el Dashboard, con la opción «Subir archivo ZIP», cargue
+          <span class="mono">proyecto-vulnerable.zip</span> y pulse «Subir y continuar a selección de políticas».</td>
+        <td class="e">Se abre la pantalla «Selección de políticas».</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">D-3</td>
+        <td class="t">Marque «Seleccionar todas (23)» y pulse «Guardar selección».</td>
+        <td class="e">Aparece el mensaje «Selección guardada correctamente.» y el resumen indica 23 políticas.</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">D-4</td>
+        <td class="t">Pulse «Iniciar análisis →» y espere el resultado.</td>
+        <td class="e">Se abre «Resultados del análisis» con 8.85% de cumplimiento ponderado y 42 hallazgos en total.</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">D-5</td>
+        <td class="t">Más abajo, en los filtros de hallazgos, filtre por la severidad «CRITICAL».</td>
+        <td class="e">La tabla muestra solo los 17 hallazgos de severidad crítica.</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">D-6</td>
+        <td class="t">Abra un hallazgo de la política «No almacenar secretos en código fuente».</td>
+        <td class="e">Se muestran el archivo, la línea, el CWE y la evidencia, con el secreto oculto como
+          <span class="mono">*****</span>.</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">D-7</td>
+        <td class="t">Abra el menú «Reportes».</td>
+        <td class="e">Un mensaje indica que los reportes están disponibles solo para los roles Auditor y Security Admin.</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ───────────────────────── Página 3: Auditor ───────────────────────── -->
+<section class="page">
+  <header class="doc">
+    <div class="brand">SegSoft · Guion de pruebas</div>
+    <div class="meta">Tareas del rol Auditor</div>
+  </header>
+  <h1>Rol Auditor</h1>
+  <p class="role-intro">El Auditor analiza proyectos y genera los reportes de cumplimiento que sirven como
+    evidencia. Usará el archivo <span class="mono">proyecto-intermedio.zip</span> y la cuenta entregada por el
+    facilitador.</p>
+
+  <table class="tasks">
+    <thead><tr><th>N.º</th><th>Tarea</th><th>Resultado esperado</th><th>Resultado</th></tr></thead>
+    <tbody class="task">
+      <tr><td class="n">A-1</td>
+        <td class="t">Inicie sesión con el usuario y la contraseña entregados por el facilitador.</td>
+        <td class="e">Se abre el Dashboard; arriba a la derecha aparece su usuario con el rol AUDITOR.</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">A-2</td>
+        <td class="t">Cargue <span class="mono">proyecto-intermedio.zip</span>, marque «Seleccionar todas (23)»,
+          pulse «Guardar selección» y luego «Iniciar análisis →».</td>
+        <td class="e">«Resultados del análisis» muestra 88.68% de cumplimiento ponderado y 5 hallazgos de
+          severidad MEDIUM.</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">A-3</td>
+        <td class="t">Pulse «Generar reporte».</td>
+        <td class="e">Se abre el «Reporte de cumplimiento» en la «Vista técnica».</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">A-4</td>
+        <td class="t">Cambie a la «Vista ejecutiva» y revise su contenido.</td>
+        <td class="e">Se mantienen los indicadores, las recomendaciones y la cobertura; desaparecen la tabla de
+          políticas y los hallazgos detallados.</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">A-5</td>
+        <td class="t">Pulse «Descargar PDF» y, después, «Descargar SARIF». Abra el PDF.</td>
+        <td class="e">Se descargan los archivos <span class="mono">segsoft-report-….pdf</span> y
+          <span class="mono">….sarif</span>. El PDF tiene portada, índice y número de página.</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">A-6</td>
+        <td class="t">Abra el menú «Reportes» y ubique el reporte que generó.</td>
+        <td class="e">El reporte aparece en la lista con integridad «Verificada».</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ───────────────────────── Página 4: Security Admin ───────────────────────── -->
+<section class="page">
+  <header class="doc">
+    <div class="brand">SegSoft · Guion de pruebas</div>
+    <div class="meta">Tareas del rol Security Admin</div>
+  </header>
+  <h1>Rol Security Admin</h1>
+  <p class="role-intro">El Security Admin administra el banco de políticas de seguridad y los Policy Sets.
+    Usará la cuenta entregada por el facilitador. Incluya sus iniciales en los nombres que cree, para
+    distinguirlos de los de otros participantes.</p>
+
+  <table class="tasks">
+    <thead><tr><th>N.º</th><th>Tarea</th><th>Resultado esperado</th><th>Resultado</th></tr></thead>
+    <tbody class="task">
+      <tr><td class="n">S-1</td>
+        <td class="t">Inicie sesión y abra el menú «Policies».</td>
+        <td class="e">Se abre el «Banco de Políticas de Seguridad» con el botón «+ Nueva política».</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">S-2</td>
+        <td class="t">Pulse «+ Nueva política» y registre una política: un nombre con sus iniciales, una
+          descripción de al menos 20 caracteres, el marco normativo «Personalizado», una categoría y el control
+          <span class="mono">TEAM-XSS-01</span>.</td>
+        <td class="e">La política queda registrada y aparece en el banco con estado «Activa».</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">S-3</td>
+        <td class="t">Abra su política, cambie el «Peso de criticidad» a 70 y pulse «Guardar cambios».</td>
+        <td class="e">El cambio se guarda y queda registrado en el «Historial de cambios».</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">S-4</td>
+        <td class="t">En la misma política pulse «+ Añadir regla», elija el tipo «Patrón Regex», escriba el patrón
+          <span class="mono">password\s*=</span> y pulse «Guardar regla».</td>
+        <td class="e">La regla aparece en la tabla «Reglas técnicas» de la política.</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">S-5</td>
+        <td class="t">Abra «Policy Sets», pulse «+ Nuevo Policy Set», escriba un nombre con sus iniciales, marque
+          tres políticas del banco distintas de la suya y pulse «Crear Policy Set».</td>
+        <td class="e">Se abre el detalle del Policy Set con «3 políticas · versión 1».</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+    <tbody class="task">
+      <tr><td class="n">S-6</td>
+        <td class="t">Vuelva a su política, pulse «Archivar» y confirme la acción.</td>
+        <td class="e">La política queda en estado «Archivada» y ya no se ofrece al seleccionar políticas para un análisis.</td>
+        <td class="r"><span class="check">Sí</span><br><span class="check">Con dificultad</span><br><span class="check">No</span></td></tr>
+      <tr><td class="obs" colspan="4">Observaciones:</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ───────────────────────── Página 5: facilitador ───────────────────────── -->
+<section class="page">
+  <header class="doc">
+    <div class="brand">SegSoft · Guion de pruebas</div>
+    <div class="meta">Notas para el facilitador</div>
+  </header>
+  <h1>Notas para el facilitador</h1>
+  <p class="role-intro">Esta página no se entrega a los participantes.</p>
+
+  <h2>Antes de la sesión</h2>
+  <ul>
+    <li><strong>Encender el servidor.</strong> En el portal de Azure: Virtual machines → <span class="mono">segsoft</span> →
+      «Start». Esperar unos dos minutos. El servidor se apaga solo a las 2:00 a. m.; al terminar la jornada puede
+      detenerse con «Stop» para ahorrar créditos.</li>
+    <li><strong>Verificar el acceso.</strong> <span class="mono">https://segsoft-frontend.vercel.app</span> debe mostrar la
+      pantalla «Bienvenido». Si el inicio de sesión falla con un error de red, el servidor aún no ha arrancado.</li>
+    <li><strong>Cuentas.</strong> Los participantes Developer crean su cuenta en la tarea D-1. Para Auditor y Security
+      Admin, entregue el usuario y la contraseña en privado. Puede consultarlos con
+      <span class="mono cmd">ssh Segsoft@20.168.55.230 'grep SEGSOFT_ACCOUNTS /opt/segsoft/segsoft-backend/deploy/.env'</span>.
+      Tras cinco contraseñas incorrectas, la cuenta se bloquea durante 30 minutos.</li>
+    <li><strong>Material.</strong> Tenga a mano los tres proyectos ZIP y el enlace de la encuesta.</li>
+  </ul>
+
+  <h2>Valores esperados</h2>
+  <table class="tasks">
+    <thead><tr><th>Proyecto</th><th>Cumplimiento ponderado</th><th>Hallazgos</th><th>Políticas que cumplen</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mono">proyecto-vulnerable.zip</span></td><td>8.85%</td><td>42 (17 críticos)</td><td>2 de 23</td></tr>
+      <tr><td><span class="mono">proyecto-intermedio.zip</span></td><td>88.68%</td><td>5 (todos de severidad media)</td><td>20 de 23</td></tr>
+      <tr><td><span class="mono">proyecto-limpio.zip</span></td><td>100%</td><td>0</td><td>23 de 23</td></tr>
+    </tbody>
+  </table>
+  <p class="small" style="margin-top:6px">Valores con las 23 políticas activas. En el reporte y en la lista de reportes
+    los porcentajes aparecen con un decimal (por ejemplo, 88,7&nbsp;%).</p>
+
+  <h2>Comportamientos conocidos (no son fallas)</h2>
+  <ul>
+    <li>En «Resultados del análisis», el estado de cada política aparece en inglés (COMPLIANT, NON_COMPLIANT,
+      REQUIRES_REVIEW); en el reporte aparece en español.</li>
+    <li>Toda cuenta creada desde «Crear cuenta» tiene el rol Developer. Los roles Auditor y Security Admin solo
+      se asignan desde el servidor.</li>
+    <li>Un participante Developer solo puede abrir los análisis que él mismo realizó.</li>
+  </ul>
+
+  <h2>Después de la sesión</h2>
+  <ul>
+    <li>Las políticas creadas por los participantes quedan archivadas en la tarea S-6. Los Policy Sets de prueba
+      pueden archivarse desde su detalle.</li>
+    <li>Recoja las hojas del guion y verifique que cada participante haya enviado la encuesta.</li>
+  </ul>
+</section>
+
+</body>
+</html>
