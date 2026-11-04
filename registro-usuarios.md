@@ -38,6 +38,26 @@ crearse una cuenta AUDITOR o SECURITY_ADMIN: esas son las del despliegue
 (`SEGSOFT_ACCOUNTS` en `segsoft-backend/deploy/.env`, ver `segsoft-backend/deploy/README.md`).
 Para dar un rol privilegiado a alguien hay que agregar su cuenta ahí y reiniciar el backend.
 
+## Bloqueo por intentos fallidos
+
+| Situación | Respuesta del login |
+|---|---|
+| Contraseña incorrecta | `401` "Credenciales inválidas. Te quedan N intentos antes de que la cuenta se bloquee durante 30 minutos." y `attemptsLeft` |
+| Usuario inexistente o cuenta deshabilitada | `401` "Credenciales inválidas. Después de 5 intentos fallidos, la cuenta se bloquea durante 30 minutos." (sin `attemptsLeft`) |
+| Quinto intento fallido en 10 minutos | `423 ACCOUNT_LOCKED`: la cuenta queda bloqueada 30 minutos y, si tiene un **correo verificado**, recibe un enlace para desbloquearla |
+| Cualquier intento mientras está bloqueada | `423 ACCOUNT_LOCKED` con `minutesLeft`, aunque la contraseña sea correcta |
+
+- El enlace (`https://www.segsoft.website/unlock-account?token=...`) se usa una sola vez y vence
+  cuando termina el bloqueo. `/unlock-account` lo envía con `POST /api/v1/auth/unlock`, que
+  levanta el bloqueo y reinicia el contador **sin iniciar sesión**: después hay que entrar con la
+  contraseña. Solo se guarda el SHA-256 del token (`account_unlock_tokens`, migración V35).
+- Se envía un solo correo por bloqueo. Las cuentas sin correo (`SEGSOFT_ACCOUNTS`) esperan los 30
+  minutos o se desbloquean en el servidor (ver `segsoft-backend/deploy/README.md`).
+- Auditoría: `LOGIN_FAILURE` por cada intento rechazado (con `reason`), `ACCOUNT_LOCKED` al
+  bloquear y `ACCOUNT_UNLOCKED` al usar el enlace.
+- El número de intentos restantes revela que el usuario existe. El registro ya lo revela con su
+  `409`, así que no agrega una filtración nueva.
+
 ## Reglas
 
 | Campo | Regla |
@@ -109,10 +129,14 @@ cd /opt/segsoft/segsoft-backend/deploy && docker compose up -d backend
 | `EmailVerificationServiceTest` | Solo se guarda el hash del token, vigencia, verificación e inicio de sesión, token desconocido, vencido, usado o de cuenta deshabilitada, reenvío, espera entre reenvíos y respuesta igual para correos desconocidos |
 | `VerificationMailerTest` | El enlace usa `APP_PUBLIC_URL`, destinatario y contenido del correo, sin SMTP no se envía y una falla de SMTP no se propaga |
 | `RegistrationRateLimiterTest` | Límite por IP y global |
+| `AuthServiceTest` | Intentos restantes, aviso para usuarios inexistentes, bloqueo al quinto intento con y sin correo, mensaje mientras dura el bloqueo |
+| `AccountUnlockServiceTest` | El enlace vence con el bloqueo y solo se guarda su hash; sin correo verificado o sin SMTP no se envía; desbloqueo y enlaces inválidos |
+| `LoginLockoutIntegrationTest` (PostgreSQL) | Intentos y auditoría guardados, `attemptsLeft`, bloqueo 423 con correo, enlace que desbloquea una sola vez, cuenta sin correo, enlace vencido, reinicio del contador |
 | `RegistrationIntegrationTest` (PostgreSQL) | Flujo HTTP completo: 201 sin sesión, correo sin verificar en la base, solo el hash del token, login 403 hasta verificar (401 con contraseña incorrecta), verificación con sesión, `/me` con correo, 403 en reportes, renovación de sesión, enlace de un solo uso, 409 de usuario y de correo, índice único de la base, 400 de correo, contraseña y usuario, reservados, reenvío con espera e invalidación del enlace anterior, enlace vencido, cuentas sin correo, limpieza de cuentas sin verificar y login rechazado de una cuenta deshabilitada |
 | `RegistrationDisabledIntegrationTest` | Con el registro apagado: 403 y `enabled: false` |
 | `RegisterForm.test.tsx` | Formulario: requisitos en vivo, validaciones (incluido el correo), minúsculas, pantalla "Revisa tu correo" sin iniciar sesión, errores 409 de usuario y de correo, 400, 429 y registro apagado |
 | `LoginForm.test.tsx` | Con `EMAIL_NOT_VERIFIED` muestra el correo y permite reenviar el enlace; con otros errores no |
+| `UnlockAccount.test.tsx` | Envía el token una vez y confirma el desbloqueo; enlace inválido; enlace sin token |
 | `VerifyEmail.test.tsx` | Verifica el token una sola vez, inicia sesión y va al Dashboard; enlace inválido con reenvío; enlace sin token |
 
 Las suites de registro corren en el `Jenkinsfile` y en el workflow de GitHub del backend.
