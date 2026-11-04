@@ -46,6 +46,7 @@ Para dar un rol privilegiado a alguien hay que agregar su cuenta ahí y reinicia
 | Usuario inexistente o cuenta deshabilitada | `401` "Credenciales inválidas. Después de 5 intentos fallidos, la cuenta se bloquea durante 30 minutos." (sin `attemptsLeft`) |
 | Quinto intento fallido en 10 minutos | `423 ACCOUNT_LOCKED`: la cuenta queda bloqueada 30 minutos y, si tiene un **correo verificado**, recibe un enlace para desbloquearla |
 | Cualquier intento mientras está bloqueada | `423 ACCOUNT_LOCKED` con `minutesLeft`, aunque la contraseña sea correcta |
+| Renovar una sesión iniciada antes del bloqueo, o abrir un enlace de verificación sin usar | También `423 ACCOUNT_LOCKED`: el bloqueo cierra todas las entradas. La cookie de sesión no se revoca y el enlace de verificación no se gasta, así que vuelven a servir cuando termina el bloqueo |
 
 - El enlace (`https://www.segsoft.website/unlock-account?token=...`) se usa una sola vez y vence
   cuando termina el bloqueo. `/unlock-account` lo envía con `POST /api/v1/auth/unlock`, que
