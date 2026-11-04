@@ -47,6 +47,7 @@ Para dar un rol privilegiado a alguien hay que agregar su cuenta ahí y reinicia
 | Quinto intento fallido en 10 minutos | `423 ACCOUNT_LOCKED`: la cuenta queda bloqueada 30 minutos y, si tiene un **correo verificado**, recibe un enlace para desbloquearla |
 | Cualquier intento mientras está bloqueada | `423 ACCOUNT_LOCKED` con `minutesLeft`, aunque la contraseña sea correcta |
 | Renovar una sesión iniciada antes del bloqueo, o abrir un enlace de verificación sin usar | También `423 ACCOUNT_LOCKED`: el bloqueo cierra todas las entradas. La cookie de sesión no se revoca y el enlace de verificación no se gasta, así que vuelven a servir cuando termina el bloqueo |
+| Abrir el enlace de desbloqueo o de verificación | La página no hace nada hasta que se pulsa **Desbloquear mi cuenta** o **Verificar mi correo**: algunos revisores de correo abren los enlaces y ejecutan la página, y en producción uno desbloqueó una cuenta segundos después del correo. Cada enlace sirve una sola vez aunque se abra varias veces a la vez (la fila del token se bloquea con `SELECT ... FOR UPDATE`) |
 | Cualquier petición con un token de acceso emitido antes del bloqueo | `423 ACCOUNT_LOCKED` desde la siguiente petición, sin esperar a que venza el token (15 minutos). Si la cuenta se deshabilita o se elimina, `401 SESSION_REVOKED`. El frontend cierra la sesión y el login muestra el motivo. Login, desbloqueo y demás rutas públicas de `/api/v1/auth` siguen funcionando aunque el navegador envíe ese token |
 
 - El enlace (`https://www.segsoft.website/unlock-account?token=...`) se usa una sola vez y vence
@@ -133,14 +134,16 @@ cd /opt/segsoft/segsoft-backend/deploy && docker compose up -d backend
 | `RegistrationRateLimiterTest` | Límite por IP y global |
 | `AuthServiceTest` | Intentos restantes, aviso para usuarios inexistentes, bloqueo al quinto intento con y sin correo, mensaje mientras dura el bloqueo |
 | `AccountAccessServiceTest` | Cada petición con token revisa la cuenta: bloqueada (423 con minutos y aviso del correo), bloqueo vencido, deshabilitada o eliminada |
+| `ClientIpResolverTest` | La IP enviada por el middleware de Vercel solo se acepta con el secreto compartido; sin él, o si no es una IP, se usa la que vio Caddy |
 | `AccountUnlockServiceTest` | El enlace vence con el bloqueo y solo se guarda su hash; sin correo verificado o sin SMTP no se envía; desbloqueo y enlaces inválidos |
-| `LoginLockoutIntegrationTest` (PostgreSQL) | Intentos y auditoría guardados, `attemptsLeft`, bloqueo 423 con correo, enlace que desbloquea una sola vez, cuenta sin correo, enlace vencido, reinicio del contador, enlace de verificación usado o sin usar y renovación de sesión durante el bloqueo, token de acceso rechazado al bloquear o deshabilitar la cuenta |
+| `LoginLockoutIntegrationTest` (PostgreSQL) | Intentos y auditoría guardados, `attemptsLeft`, bloqueo 423 con correo, enlace que desbloquea una sola vez, cuenta sin correo, enlace vencido, reinicio del contador, enlace de verificación usado o sin usar y renovación de sesión durante el bloqueo, token de acceso rechazado al bloquear o deshabilitar la cuenta, enlaces de desbloqueo y de verificación abiertos 8 veces a la vez (solo uno funciona) |
 | `RegistrationIntegrationTest` (PostgreSQL) | Flujo HTTP completo: 201 sin sesión, correo sin verificar en la base, solo el hash del token, login 403 hasta verificar (401 con contraseña incorrecta), verificación con sesión, `/me` con correo, 403 en reportes, renovación de sesión, enlace de un solo uso, 409 de usuario y de correo, índice único de la base, 400 de correo, contraseña y usuario, reservados, reenvío con espera e invalidación del enlace anterior, enlace vencido, cuentas sin correo, limpieza de cuentas sin verificar y login rechazado de una cuenta deshabilitada |
 | `RegistrationDisabledIntegrationTest` | Con el registro apagado: 403 y `enabled: false` |
 | `RegisterForm.test.tsx` | Formulario: requisitos en vivo, validaciones (incluido el correo), minúsculas, pantalla "Revisa tu correo" sin iniciar sesión, errores 409 de usuario y de correo, 400, 429 y registro apagado |
 | `LoginForm.test.tsx` | Con `EMAIL_NOT_VERIFIED` muestra el correo y permite reenviar el enlace; con otros errores no |
-| `UnlockAccount.test.tsx` | Envía el token una vez y confirma el desbloqueo; enlace inválido; enlace sin token |
-| `VerifyEmail.test.tsx` | Verifica el token una sola vez, inicia sesión y va al Dashboard; enlace inválido con reenvío; enlace sin token |
+| `UnlockAccount.test.tsx` | No envía nada hasta pulsar el botón; envía el token una vez y confirma el desbloqueo; enlace inválido; enlace sin token |
+| `VerifyEmail.test.tsx` | No envía nada hasta pulsar el botón; verifica el token una sola vez, inicia sesión y va al Dashboard; enlace inválido con reenvío; enlace sin token |
+| `middleware.test.ts` | El middleware de Vercel envía la IP real y el secreto al backend, reemplaza lo que mande el navegador en esos encabezados y, sin `PROXY_SECRET`, deja la petición a `vercel.json` |
 
 Las suites de registro corren en el `Jenkinsfile` y en el workflow de GitHub del backend.
 
