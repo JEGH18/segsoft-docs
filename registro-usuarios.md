@@ -47,6 +47,7 @@ Para dar un rol privilegiado a alguien hay que agregar su cuenta ahí y reinicia
 | Quinto intento fallido en 10 minutos | `423 ACCOUNT_LOCKED`: la cuenta queda bloqueada 30 minutos y, si tiene un **correo verificado**, recibe un enlace para desbloquearla |
 | Cualquier intento mientras está bloqueada | `423 ACCOUNT_LOCKED` con `minutesLeft`, aunque la contraseña sea correcta |
 | Renovar una sesión iniciada antes del bloqueo, o abrir un enlace de verificación sin usar | También `423 ACCOUNT_LOCKED`: el bloqueo cierra todas las entradas. La cookie de sesión no se revoca y el enlace de verificación no se gasta, así que vuelven a servir cuando termina el bloqueo |
+| Cualquier petición con un token de acceso emitido antes del bloqueo | `423 ACCOUNT_LOCKED` desde la siguiente petición, sin esperar a que venza el token (15 minutos). Si la cuenta se deshabilita o se elimina, `401 SESSION_REVOKED`. El frontend cierra la sesión y el login muestra el motivo. Login, desbloqueo y demás rutas públicas de `/api/v1/auth` siguen funcionando aunque el navegador envíe ese token |
 
 - El enlace (`https://www.segsoft.website/unlock-account?token=...`) se usa una sola vez y vence
   cuando termina el bloqueo. `/unlock-account` lo envía con `POST /api/v1/auth/unlock`, que
@@ -131,8 +132,9 @@ cd /opt/segsoft/segsoft-backend/deploy && docker compose up -d backend
 | `VerificationMailerTest` | El enlace usa `APP_PUBLIC_URL`, destinatario y contenido del correo, sin SMTP no se envía y una falla de SMTP no se propaga |
 | `RegistrationRateLimiterTest` | Límite por IP y global |
 | `AuthServiceTest` | Intentos restantes, aviso para usuarios inexistentes, bloqueo al quinto intento con y sin correo, mensaje mientras dura el bloqueo |
+| `AccountAccessServiceTest` | Cada petición con token revisa la cuenta: bloqueada (423 con minutos y aviso del correo), bloqueo vencido, deshabilitada o eliminada |
 | `AccountUnlockServiceTest` | El enlace vence con el bloqueo y solo se guarda su hash; sin correo verificado o sin SMTP no se envía; desbloqueo y enlaces inválidos |
-| `LoginLockoutIntegrationTest` (PostgreSQL) | Intentos y auditoría guardados, `attemptsLeft`, bloqueo 423 con correo, enlace que desbloquea una sola vez, cuenta sin correo, enlace vencido, reinicio del contador |
+| `LoginLockoutIntegrationTest` (PostgreSQL) | Intentos y auditoría guardados, `attemptsLeft`, bloqueo 423 con correo, enlace que desbloquea una sola vez, cuenta sin correo, enlace vencido, reinicio del contador, enlace de verificación usado o sin usar y renovación de sesión durante el bloqueo, token de acceso rechazado al bloquear o deshabilitar la cuenta |
 | `RegistrationIntegrationTest` (PostgreSQL) | Flujo HTTP completo: 201 sin sesión, correo sin verificar en la base, solo el hash del token, login 403 hasta verificar (401 con contraseña incorrecta), verificación con sesión, `/me` con correo, 403 en reportes, renovación de sesión, enlace de un solo uso, 409 de usuario y de correo, índice único de la base, 400 de correo, contraseña y usuario, reservados, reenvío con espera e invalidación del enlace anterior, enlace vencido, cuentas sin correo, limpieza de cuentas sin verificar y login rechazado de una cuenta deshabilitada |
 | `RegistrationDisabledIntegrationTest` | Con el registro apagado: 403 y `enabled: false` |
 | `RegisterForm.test.tsx` | Formulario: requisitos en vivo, validaciones (incluido el correo), minúsculas, pantalla "Revisa tu correo" sin iniciar sesión, errores 409 de usuario y de correo, 400, 429 y registro apagado |
