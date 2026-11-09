@@ -7,7 +7,7 @@ Detecta vulnerabilidades en repositorios de código fuente en 5 categorías: SQL
 
 ## Repositorios
 
-El proyecto se divide en cuatro repositorios. Los oficiales están en **p2tools**
+El proyecto se divide en cinco repositorios. Los oficiales están en **p2tools**
 (Bitbucket Server de la Icesi); GitHub (`JEGH18/…`) es un espejo.
 
 | Repositorio | Contenido | p2tools |
@@ -15,6 +15,7 @@ El proyecto se divide en cuatro repositorios. Los oficiales están en **p2tools*
 | `segsoft-backend` | API REST principal (Spring Boot 3 / Java 17) | `https://pi2tools.icesi.edu.co/bitbucket/scm/segsoft/segsoft-backend.git` |
 | `segsoft-motorpython` | Motor de análisis de reglas (FastAPI / Python 3.11) | `https://pi2tools.icesi.edu.co/bitbucket/scm/segsoft/segsoft-motorpython.git` |
 | `segsoft-frontend` | SPA (React 18 + Vite 5 + TypeScript) | `https://pi2tools.icesi.edu.co/bitbucket/scm/segsoft/segsoft-frontend.git` |
+| `segsoft-cli` | CLI `pdgseg` para ejecutar el análisis desde pipelines CI/CD (Python, paquete `pdgseg-cli`) | Solo en GitHub por ahora: `https://github.com/JEGH18/segsoft-cli` |
 | `segsoft-docs` | Documentación técnica (este repositorio) | `https://pi2tools.icesi.edu.co/bitbucket/scm/segsoft/segsoft-docs.git` |
 
 Por SSH (solo desde la red de la Icesi o con VPN):
@@ -22,6 +23,12 @@ Por SSH (solo desde la red de la Icesi o con VPN):
 
 El CI corre en el Jenkins de p2tools con el `Jenkinsfile` de cada repositorio de código:
 ver [ci-jenkins-p2tools.md](ci-jenkins-p2tools.md).
+
+El análisis también se puede ejecutar desde la línea de comandos y desde pipelines (GitHub Actions,
+GitLab CI, Jenkins) con el CLI `pdgseg` y un token de API personal (en la aplicación: ícono de llave →
+Tokens de API). Instalación, `.pdgseg.yml`, códigos de salida y ejemplos de pipelines: ver el
+[README de segsoft-cli](https://github.com/JEGH18/segsoft-cli#readme). El backend y el frontend se
+analizan a sí mismos con él en `.github/workflows/segsoft.yml` (dogfooding).
 
 El despliegue (frontend en Vercel; backend, motor y PostgreSQL con Docker en un servidor)
 está documentado en `segsoft-backend/deploy/README.md`.
