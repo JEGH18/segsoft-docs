@@ -61,6 +61,37 @@ Para dar un rol privilegiado a alguien hay que agregar su cuenta ahí y reinicia
 - El número de intentos restantes revela que el usuario existe. El registro ya lo revela con su
   `409`, así que no agrega una filtración nueva.
 
+## Recuperación de contraseña
+
+1. En el login, **¿Olvidaste tu contraseña?** lleva a `/forgot-password`, donde se escribe el correo.
+2. `POST /api/v1/auth/forgot-password` responde siempre `202` con el mismo mensaje, exista o no la
+   cuenta, para no revelar qué correos están registrados. Solo las cuentas **habilitadas y con el
+   correo verificado** reciben el enlace; las de `SEGSOFT_ACCOUNTS`, que no tienen correo, no.
+3. El enlace (`/reset-password?token=...`) vence a los **30 minutos** (`auth.password-reset.token-ttl`),
+   sirve una sola vez aunque se abra varias veces a la vez, y pedir otro invalida los anteriores. Entre
+   dos pedidos de la misma cuenta debe pasar un minuto. Solo se guarda el SHA-256 del token
+   (`password_reset_tokens`, migración V36).
+4. La página pide la contraseña nueva dos veces, con los mismos requisitos del registro. El token se
+   envía solo junto con la contraseña, así que un revisor de correo que abra el enlace no lo gasta.
+5. `POST /api/v1/auth/reset-password` cambia la contraseña y:
+   - **cierra todas las sesiones abiertas**: cada token lleva el `token_version` de la cuenta, que el
+     cambio incrementa. Los tokens anteriores reciben `401 SESSION_REVOKED` desde la siguiente
+     petición, y su renovación también se rechaza;
+   - levanta un bloqueo por intentos fallidos, porque el enlace demuestra que el correo es del dueño;
+   - envía un correo avisando del cambio, con un enlace para recuperar la cuenta si no fue el dueño;
+   - **no inicia sesión**: después se entra con la contraseña nueva.
+
+| Respuesta de `reset-password` | Cuándo |
+|---|---|
+| `200` | La contraseña cambió |
+| `400 VALIDATION_ERROR` con `errors.password` | No cumple los requisitos o es demasiado común; el enlace sigue sirviendo |
+| `400 VALIDATION_ERROR` "La contraseña nueva debe ser distinta de la actual." | Es igual a la actual; el enlace sigue sirviendo |
+| `400 INVALID_RESET_TOKEN` | El enlace no existe, ya se usó o venció |
+
+Auditoría: `PASSWORD_RESET_REQUESTED` al enviar el enlace y `PASSWORD_RESET` al cambiarla. El pedido
+cuenta contra el mismo límite por IP del registro, y responde `503` si el envío de correos no está
+configurado.
+
 ## Reglas
 
 | Campo | Regla |
@@ -134,6 +165,8 @@ cd /opt/segsoft/segsoft-backend/deploy && docker compose up -d backend
 | `RegistrationRateLimiterTest` | Límite por IP y global |
 | `AuthServiceTest` | Intentos restantes, aviso para usuarios inexistentes, bloqueo al quinto intento con y sin correo, mensaje mientras dura el bloqueo |
 | `AccountAccessServiceTest` | Cada petición con token revisa la cuenta: bloqueada (423 con minutos y aviso del correo), bloqueo vencido, deshabilitada o eliminada |
+| `PasswordResetServiceTest` | El enlace solo va a cuentas habilitadas con el correo verificado, se guarda su hash y respeta la espera; cambiar la contraseña sube `token_version`, levanta el bloqueo y avisa por correo; la actual se rechaza sin gastar el enlace; enlaces desconocidos, usados, vencidos o de cuentas deshabilitadas |
+| `PasswordResetIntegrationTest` (PostgreSQL) | Flujo completo: reglas de la contraseña, sesiones anteriores cerradas (acceso y renovación), contraseña vieja rechazada, enlace de un solo uso, misma respuesta sin cuenta, enlace nuevo que invalida el anterior, espera, enlace vencido, bloqueo levantado y 8 envíos simultáneos con un solo cambio |
 | `ClientIpResolverTest` | La IP enviada por el middleware de Vercel solo se acepta con el secreto compartido; sin él, o si no es una IP, se usa la que vio Caddy |
 | `AccountUnlockServiceTest` | El enlace vence con el bloqueo y solo se guarda su hash; sin correo verificado o sin SMTP no se envía; desbloqueo y enlaces inválidos |
 | `LoginLockoutIntegrationTest` (PostgreSQL) | Intentos y auditoría guardados, `attemptsLeft`, bloqueo 423 con correo, enlace que desbloquea una sola vez, cuenta sin correo, enlace vencido, reinicio del contador, enlace de verificación usado o sin usar y renovación de sesión durante el bloqueo, token de acceso rechazado al bloquear o deshabilitar la cuenta, enlaces de desbloqueo y de verificación abiertos 8 veces a la vez (solo uno funciona) |
@@ -143,6 +176,8 @@ cd /opt/segsoft/segsoft-backend/deploy && docker compose up -d backend
 | `LoginForm.test.tsx` | Con `EMAIL_NOT_VERIFIED` muestra el correo y permite reenviar el enlace; con otros errores no |
 | `UnlockAccount.test.tsx` | No envía nada hasta pulsar el botón; envía el token una vez y confirma el desbloqueo; enlace inválido; enlace sin token |
 | `VerifyEmail.test.tsx` | No envía nada hasta pulsar el botón; verifica el token una sola vez, inicia sesión y va al Dashboard; enlace inválido con reenvío; enlace sin token |
+| `ForgotPassword.test.tsx` | Envía el correo normalizado y muestra la misma respuesta; no llama a la API con un correo inválido; muestra los errores del servidor |
+| `ResetPassword.test.tsx` | Envía el token con la contraseña nueva; requisitos en vivo; contraseña débil o distinta en la confirmación; error de contraseña sin perder el enlace; enlace usado o vencido con opción de pedir otro; enlace sin token |
 | `middleware.test.ts` | El middleware de Vercel envía la IP real y el secreto al backend, reemplaza lo que mande el navegador en esos encabezados y, sin `PROXY_SECRET`, deja la petición a `vercel.json` |
 
 Las suites de registro corren en el `Jenkinsfile` y en el workflow de GitHub del backend.
