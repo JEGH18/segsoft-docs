@@ -53,25 +53,20 @@ ZIP de prueba y capturas de la interfaz) está en [pruebas-usuarios/](pruebas-us
 
 ---
 
-## Levantar el entorno completo con Docker Compose
+## Levantar el backend, el motor y PostgreSQL con Docker Compose
+
+El `docker-compose.yml` está en `segsoft-backend/deploy/` (no en la raíz) y espera
+`segsoft-backend` y `segsoft-motorpython` clonados uno al lado del otro:
 
 ```bash
-# 1. Copiar variables de entorno
-cp .env.example .env
-# Editar .env con tus valores reales antes de continuar
-
-# 2. Levantar todos los servicios
-docker-compose up --build
+cd segsoft-backend/deploy
+./generar-env.sh <dominio-del-backend> <origen-del-frontend>   # crea deploy/.env
+docker compose up -d --build
 ```
 
-Servicios disponibles:
-
-| Servicio        | URL                          |
-|-----------------|------------------------------|
-| Spring Boot API | http://localhost:8080        |
-| Swagger UI      | http://localhost:8080/swagger-ui.html |
-| Motor Python    | http://localhost:8001        |
-| Grafana         | http://localhost:3001        |
+Levanta PostgreSQL, el motor (solo en la red interna de Docker), el backend (en
+`127.0.0.1:8080`) y Caddy con HTTPS. Detalle en `segsoft-backend/deploy/README.md`.
+Swagger UI queda en `/swagger-ui.html` del backend. No hay Grafana en el despliegue actual.
 
 ---
 
@@ -83,7 +78,8 @@ Servicios disponibles:
 cd segsoft-backend
 # Requiere PostgreSQL corriendo en localhost:5432
 # Usar el perfil dev:
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+# El repositorio no trae el Maven wrapper (mvnw): usar Maven 3.9 instalado.
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 ### Motor Python
@@ -118,21 +114,35 @@ npm run dev
 | `DB_POSTGRES_DB`           | Nombre de la base de datos (PostgreSQL container) |
 | `DB_POSTGRES_USER`         | Usuario del container PostgreSQL |
 | `DB_POSTGRES_PASSWORD`     | Contraseña del container PostgreSQL |
-| `JWT_PRIVATE_KEY`          | Clave privada RS256 en PEM para firma de tokens JWT |
+| `JWT_SECRET`               | Secreto HMAC-SHA256 (HS256) con el que se firman los tokens JWT (≥32 caracteres). `JWT_PRIVATE_KEY` existe en la configuración pero no se usa |
 | `INTERNAL_SERVICE_TOKEN`   | Token secreto para comunicación Spring ↔ Python (≥32 chars) |
 | `ENGINE_BASE_URL`          | URL base del motor Python |
 | `SANDBOX_ROOT`             | Directorio raíz para clonar repositorios analizados |
 | `MAX_REPO_SIZE_MB`         | Tamaño máximo de repositorio en MB (default: 100) |
 | `MAX_FILE_COUNT`           | Máximo número de archivos por repositorio (default: 5000) |
 | `MAX_COMPRESSION_RATIO`    | Ratio máximo de compresión para detectar zip bombs (default: 100) |
+| `MAX_EXTRACTED_SIZE_MB`    | Tope absoluto de lo que puede ocupar un ZIP descomprimido, en MB (default: 500). Se revisa mientras se escribe |
+| `ENGINE_BATCH_SIZE`        | Archivos que el backend envía al motor por petición, por regla (default: 100, máximo 500) |
+| `ENGINE_READ_TIMEOUT_MS`   | Timeout de lectura de una petición al motor (default: 180000; debe superar `BATCH_TIMEOUT_SECONDS` del motor) |
 | `ALLOWED_GIT_DOMAINS`      | Dominios Git permitidos (separados por coma) |
-| `RULE_TIMEOUT_MS`          | Timeout por regla de análisis en milisegundos (default: 30000) |
+| `RULE_TIMEOUT_MS`          | Sin uso en el código actual. El límite real lo aplica el motor: ver abajo |
 | `TRACEABILITY_RETENTION_DAYS` | Días de retención de registros de trazabilidad (default: 365) |
 | `MAX_EXPORT_SIZE_MB`       | Tamaño máximo de un PDF/SARIF exportado en MB (default: 50); si se supera, HTTP 422 |
 | `EXPORT_CACHE_DIR`         | Directorio de la caché de exportaciones (default: `${java.io.tmpdir}/pdgseg-export-cache`) |
 | `EXPORT_CACHE_TTL`         | Vigencia de una exportación cacheada, ISO-8601 (default: `PT1H`; `PT0S` la desactiva) |
 | `EXPORT_CACHE_CLEANUP_INTERVAL` | Frecuencia de limpieza de exportaciones expiradas (default: `PT15M`) |
-| `VITE_API_BASE_URL`        | URL base de la API para el frontend |
+| `VITE_API_BASE_URL`        | URL base de la API para el frontend (vacía en producción: se usa el proxy `/api` de Vercel) |
+| `VITE_UPLOAD_BASE_URL`     | URL del backend a la que el frontend sube los ZIP directamente, sin pasar por el proxy de Vercel, que rechaza cuerpos de más de ~4.5 MB. En producción está en `segsoft-frontend/.env.production` |
+
+Variables del motor (`segsoft-motorpython`):
+
+| Variable                   | Descripción |
+|----------------------------|-------------|
+| `INTERNAL_SERVICE_TOKEN`   | El mismo token que el backend |
+| `SANDBOX_ROOT`             | El motor solo lee archivos dentro de esta carpeta, después de resolver `..` y enlaces simbólicos (en la imagen Docker: `/tmp/pdgseg-sandbox`) |
+| `RULE_TIMEOUT_SECONDS`     | Tiempo máximo de una regla sobre un archivo (default: 5). Un patrón con *backtracking* catastrófico se corta con `RULE_TIMEOUT` |
+| `BATCH_TIMEOUT_SECONDS`    | Tiempo máximo de una petición por lotes (default: 120); los archivos que no alcanzan a revisarse reciben el error `BATCH_TIMEOUT` |
+| `MAX_AST_FILE_BYTES`       | Archivos `.py` más grandes que esto se revisan con heurísticas por línea en vez de `ast` (default: 2 MB) |
 
 ---
 
@@ -152,7 +162,7 @@ mvn test -Pintegration-tests
 
 ```bash
 cd segsoft-motorpython
-pytest tests/ -v
+pytest tests/ -v          # unitarios + validación de precisión/cobertura
 bandit -c bandit.yml -r app/
 ```
 
